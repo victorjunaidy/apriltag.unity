@@ -1,12 +1,15 @@
 {
   "author": "Keijiro Takahashi",
+  "contributors": [
+    {"name":"Victor","email":"victor.victor@tu-dresden.de"}
+  ],
   "dependencies": { "com.unity.burst": "1.6.5" },
   "description": "AprilTags visual fiducial system developed by the APRIL robotics laboratory at the University of Michigan",
   "displayName": "AprilTag",
   "keywords": [ "unity" ],
   "license": "BSD-2-Clause",
-  "name": "jp.keijiro.apriltag",
-  "unity": "2021.3",
-  "unityRelease": "0f1",
-  "version": "1.0.2"
+  "name": "de.tu-dresden.inf.st.apriltag.unity",
+  "unity": "2022.3",
+  "unityRelease": "34f1",
+  "version": "1.0.3"
 }

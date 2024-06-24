@@ -1,5 +1,4 @@
 using Unity.Collections;
-using Unity.Jobs;
 using Unity.Mathematics;
 
 namespace AprilTag {
@@ -15,29 +14,29 @@ struct PoseEstimationJob : Unity.Jobs.IJobParallelFor
         unsafe Interop.Detection* p;
 
         unsafe public Input(ref Interop.Detection r)
-          => p = (Interop.Detection*)Interop.Util.AsPointer(ref r);
+            => p = (Interop.Detection*)Interop.Util.AsPointer(ref r);
 
         unsafe public ref Interop.Detection Ref
-          => ref Interop.Util.AsRef<Interop.Detection>(p);
+            => ref Interop.Util.AsRef<Interop.Detection>(p);
     }
 
     // I/O
     [ReadOnly] NativeArray<Input> _input;
+    [ReadOnly] NativeArray<float> _tagSizes;
     [WriteOnly] NativeArray<TagPose> _output;
 
     // Camera parameters
-    double _tagSize;
     double _focalLength;
     double2 _focalCenter;
 
     // Constructor
     public PoseEstimationJob
-      (NativeArray<Input> input, NativeArray<TagPose> output,
-       int width, int height, float fov, float tagSize)
+    (NativeArray<Input> input, NativeArray<float> tagSizes, NativeArray<TagPose> output,
+        int width, int height, float fov)
     {
         _input = input;
+        _tagSizes = tagSizes;
         _output = output;
-        _tagSize = tagSize;
         _focalLength = height / 2 / math.tan(fov / 2);
         _focalCenter = math.double2(width, height) / 2;
     }
@@ -45,8 +44,8 @@ struct PoseEstimationJob : Unity.Jobs.IJobParallelFor
     // Job execution method
     public void Execute(int i)
     {
-        var info = new Interop.DetectionInfo(ref _input[i].Ref, _tagSize,
-           _focalLength, _focalLength, _focalCenter.x, _focalCenter.y);
+        var info = new Interop.DetectionInfo(ref _input[i].Ref, _tagSizes[i],
+            _focalLength, _focalLength, _focalCenter.x, _focalCenter.y);
 
         using var pose = new Interop.Pose(ref info);
 

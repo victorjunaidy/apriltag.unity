@@ -18,7 +18,7 @@ sealed class TagDrawer : System.IDisposable
         _sharedMaterial = null;
     }
 
-    public void Draw(int id, Vector3 position, Quaternion rotation, float scale)
+    public void Draw(Vector3 position, Quaternion rotation, float scale)
     {
         var xform = Matrix4x4.TRS(position, rotation, Vector3.one * scale);
         Graphics.DrawMesh(_mesh, xform, _sharedMaterial, 0);

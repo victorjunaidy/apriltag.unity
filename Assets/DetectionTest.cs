@@ -7,10 +7,11 @@ sealed class DetectionTest : MonoBehaviour
 {
     [SerializeField] ImageSource _source = null;
     [SerializeField] int _decimation = 4;
-    [SerializeField] float _tagSize = 0.05f;
     [SerializeField] Material _tagMaterial = null;
     [SerializeField] UI.RawImage _webcamPreview = null;
     [SerializeField] UI.Text _debugText = null;
+    [SerializeField] float[] _tagSizes;
+    [SerializeField] int _tagSizeDivider = 100;
 
     AprilTag.TagDetector _detector;
     TagDrawer _drawer;
@@ -38,15 +39,15 @@ sealed class DetectionTest : MonoBehaviour
 
         // AprilTag detection
         var fov = Camera.main.fieldOfView * Mathf.Deg2Rad;
-        _detector.ProcessImage(image, fov, _tagSize);
+        _detector.ProcessImage(image, fov, _tagSizes, _tagSizeDivider);
 
         // Detected tag visualization
         foreach (var tag in _detector.DetectedTags)
-            _drawer.Draw(tag.ID, tag.Position, tag.Rotation, _tagSize);
+            _drawer.Draw(tag.Position, tag.Rotation, _tagSizes[tag.ID / _tagSizeDivider]);
 
         // Profile data output (with 30 frame interval)
         if (Time.frameCount % 30 == 0)
             _debugText.text = _detector.ProfileData.Aggregate
-              ("Profile (usec)", (c, n) => $"{c}\n{n.name} : {n.time}");
+                ("Profile (usec)", (c, n) => $"{c}\n{n.name} : {n.time}");
     }
 }

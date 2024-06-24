@@ -53,10 +53,10 @@ public sealed class TagDetector : System.IDisposable
     }
 
     public void ProcessImage
-      (ReadOnlySpan<Color32> image, float fov, float tagSize)
+      (ReadOnlySpan<Color32> image, float fov, float[] tagSizes, int tagSizeDivider)
     {
         ImageConverter.Convert(image, _image);
-        RunDetectorAndEstimator(fov, tagSize);
+        RunDetectorAndEstimator(fov, tagSizes, tagSizeDivider);
     }
 
     #endregion
@@ -84,7 +84,7 @@ public sealed class TagDetector : System.IDisposable
     // Unity's job system. It's a bit complicated due to "impedance mismatch"
     // things (unmanaged vs managed vs Unity DOTS).
     //
-    void RunDetectorAndEstimator(float fov, float tagSize)
+    void RunDetectorAndEstimator(float fov, float[] tagSizes, int tagSizeDivider)
     {
         _profileData = null;
 
@@ -99,8 +99,13 @@ public sealed class TagDetector : System.IDisposable
 
         var slice = new NativeSlice<PoseEstimationJob.Input>(jobInput);
 
+        var jobTagSizes = new NativeArray<float>(tagCount, Allocator.TempJob);
+
         for (var i = 0; i < tagCount; i++)
+        {
+            jobTagSizes[i] = tagSizes[tags[i].ID / tagSizeDivider];
             slice[i] = new PoseEstimationJob.Input(ref tags[i]);
+        }
 
         // Pose estimation output buffer
         using var jobOutput
@@ -108,7 +113,7 @@ public sealed class TagDetector : System.IDisposable
 
         // Pose estimation job
         var job = new PoseEstimationJob
-          (jobInput, jobOutput, _image.Width, _image.Height, fov, tagSize);
+          (jobInput, jobTagSizes, jobOutput, _image.Width, _image.Height, fov);
 
         // Run and wait the jobs.
         job.Schedule(tagCount, 1, default(JobHandle)).Complete();

@@ -1,9 +1,13 @@
-jp.keijiro.apriltag - AprilTag package for Unity
+de.tu-dresden.inf.st.apriltag.unity - AprilTag package for Unity
 ================================================
+
+A fork of [Keijiro's AprilTag Unity plugin project] with additional support for multiple tag sizes.
+
+[Keijiro's AprilTag Unity plugin project]: https://github.com/keijiro/jp.keijiro.apriltag
 
 ![gif](https://i.imgur.com/1iushmq.gif)
 
-**jp.keijiro.apriltag** is a Unity package providing a native code
+**de.tu-dresden.inf.st.apriltag.unity** is a Unity package providing a native code
 implementation of an AprilTag tracker.
 
 **AprilTag** is a marker based tracking system developed by the APRIL Robotics
@@ -15,7 +19,7 @@ for further details.
 System requirements
 -------------------
 
-- Unity 2021.3
+- Unity 2022.3
 
 At the moment, this package supports the following systems:
 
@@ -45,7 +49,7 @@ The current version of the `TagDetector` component only supports the
 smartphone screen to display the tags.
 
 [the apriltag-imgs repository]:
-  https://github.com/AprilRobotics/apriltag-imgs/tree/master/tagStandard41h12
+https://github.com/AprilRobotics/apriltag-imgs/tree/master/tagStandard41h12
 
 The `DetectionTest` component uses the Field of View value of the main camera to
 estimate tag positions. You can try the sample without adjusting it, but it may
@@ -59,7 +63,7 @@ For example, I'm using [Zoom Q2n-4K video camera] for testing, which gives about
 "Horizontal" and the Field of View value to 78.
 
 [Zoom Q2n-4K video camera]:
-  https://zoomcorp.com/en/us/video-recorders/video-recorders/q2n-4k-handy-video-recorder/
+https://zoomcorp.com/en/us/video-recorders/video-recorders/q2n-4k-handy-video-recorder/
 
 How to detect tags
 ------------------
@@ -75,11 +79,18 @@ detector = new AprilTag.TagDetector(imageWidth, imageHeight, decimation);
 
 Call the `ProcessImage` method every frame to detect tags from an input image.
 You can use `ReadonlySpan<Color32>` to give an image. At the same time, you have
-to specify the camera FoV (horizontal) in degrees and the tag size in meters.
+to specify:
+- the camera FoV (horizontal) in degrees
+- an array of tag size in meters
+- tag ID divider for the tag size array  
+  For example, 3 tag sizes with a divider of 100 will give you the following tag sizes:
+  - tagSizes[0] for tag ID 0 - 99
+  - tagSizes[1] for tag ID 100 - 199
+  - tagSizes[2] for tag ID 200 - 299
 
 ```csharp
 texture.GetPixels32(buffer);
-detector.ProcessImage(buffer, fov, tagSize);
+detector.ProcessImage(buffer, fov, tagSizes, tagSizeDivider);
 ```
 
 You can retrieve the detected tags from the `DetectedTags` property.
